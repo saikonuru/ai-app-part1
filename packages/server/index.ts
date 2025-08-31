@@ -3,6 +3,7 @@ import type { Request, Response } from 'express';
 import express from 'express';
 import OpenAI from 'openai';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
+import z from 'zod';
 
 dotenv.config();
 
@@ -29,14 +30,24 @@ const queryLocalLLM = async (messages: ChatCompletionMessageParam[]) => {
    return response.choices[0]?.message;
 };
 
-app.post('/api/chat', async (req: Request, res: Response) => {
-   const { prompt, conversationId } = req.body;
+const chatSchema = z.object({
+   prompt: z
+      .string()
+      .trim()
+      .min(1, 'Prompt is required')
+      .max(1000, 'Prompt is too long (max 1000 characters)'),
+   conversationId: z.uuid(),
+});
 
-   if (!prompt || !conversationId) {
-      return res
-         .status(400)
-         .json({ message: 'prompt and conversationId are required.' });
+app.post('/api/chat', async (req: Request, res: Response) => {
+   const parseResult = chatSchema.safeParse(req.body);
+
+   if (!parseResult.success) {
+      res.status(400).json(parseResult.error.format());
+      return;
    }
+
+   const { prompt, conversationId } = req.body;
 
    // Get or create conversation history
    let conversationHistory = conversations.get(conversationId);
@@ -45,7 +56,7 @@ app.post('/api/chat', async (req: Request, res: Response) => {
          {
             role: 'system',
             content:
-               'You are a helpful assistant that provides short answers to questions.',
+               'You are a helpful assistant that provides short and concise answers to questions.',
          },
       ];
       conversations.set(conversationId, conversationHistory);
@@ -69,7 +80,7 @@ app.post('/api/chat', async (req: Request, res: Response) => {
          });
       }
    } catch (error) {
-      console.error('Error calling Ollama:', error);
+      console.error('Error calling LLM:', error);
       // If the API call fails, remove the user's last message from the history
       // so they can try again without the failed message being part of the context.
       conversationHistory.pop();
