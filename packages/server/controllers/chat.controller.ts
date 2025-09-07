@@ -2,7 +2,7 @@ import type {Request, Response} from 'express';
 import {LLMError} from '../llm-error';
 import {chatSchema} from '../repository/chat.schema';
 import {chatService} from '../services/chat.service';
-export const charController = {
+export const chatController = {
   async sendMessage(req: Request, res: Response) {
     const parseResult = chatSchema.safeParse(req.body);
 

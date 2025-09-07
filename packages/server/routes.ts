@@ -1,6 +1,6 @@
 import type {Request, Response} from 'express';
 import express from 'express';
-import {charController} from './controllers/chat.controller';
+import {chatController} from './controllers/chat.controller';
 
 const router = express.Router();
 
@@ -16,6 +16,6 @@ router.get('/api/hello', (req: Request, res: Response) => {
   res.json({message: 'Hello World!'});
 });
 
-router.post('/api/chat', charController.sendMessage);
+router.post('/api/chat', chatController.sendMessage);
 
 export default router;

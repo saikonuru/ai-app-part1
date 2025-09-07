@@ -3,8 +3,8 @@ import type {ChatCompletionMessageParam} from 'openai/resources/chat/completions
 const conversations = new Map<string, ChatCompletionMessageParam[]>();
 
 const DEFAULT_SYSTEM_PROMPT = `You are a helpful assistant. Based on the conversation history, 
-       provide a short and concise answer to the user's last message.
-       Do not repeat the conversation history in your response.`;
+       provide a short and concise answer to the user's question.`;
+//  Do not repeat the conversation history in your response.`;
 
 const getConversationHistory = (conversationId: string) => {
   let conversationHistory = conversations.get(conversationId);
