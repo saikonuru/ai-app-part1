@@ -14,7 +14,7 @@ const ollama = new OpenAI({
   apiKey: 'ollama', // required but not used
 });
 
-const queryLocalLLM = async (
+const queryLLM = async (
   messages: ChatCompletionMessageParam[],
   client: OpenAI
 ): Promise<ChatResponse> => {
@@ -46,7 +46,7 @@ export const chatService = {
       const conversationHistory =
         conversationRepository.getConversationHistory(conversationId);
       // Pass the full conversation history to the LLM to provide context.
-      const llmResponse = await queryLocalLLM(conversationHistory, ollama);
+      const llmResponse = await queryLLM(conversationHistory, ollama);
       conversationRepository.addMessageToConversation(conversationId, {
         role: 'assistant',
         content: llmResponse.message,
