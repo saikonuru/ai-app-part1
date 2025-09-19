@@ -1,10 +1,19 @@
+import fs from 'fs';
 import type {ChatCompletionMessageParam} from 'openai/resources/chat/completions';
+import path from 'path';
+import template from '../prompts/chatbot.txt';
 
 const conversations = new Map<string, ChatCompletionMessageParam[]>();
 
-const DEFAULT_SYSTEM_PROMPT = `You are a helpful assistant. Based on the conversation history, 
-       provide a short and concise answer to the user's question.`;
-//  Do not repeat the conversation history in your response.`;
+const parkIno = fs.readFileSync(
+  path.join(__dirname, '..', 'prompts', 'WonderWorld.md'),
+  'utf-8'
+);
+
+const instructions = template.replace('{{parkIno}}', parkIno);
+
+// const DEFAULT_SYSTEM_PROMPT = `You are a helpful assistant. Based on the conversation history,
+//        provide a short and concise answer to the user's question.`;
 
 const getConversationHistory = (conversationId: string) => {
   let conversationHistory = conversations.get(conversationId);
@@ -12,7 +21,8 @@ const getConversationHistory = (conversationId: string) => {
     conversationHistory = [
       {
         role: 'system',
-        content: process.env.SYSTEM_PROMPT || DEFAULT_SYSTEM_PROMPT,
+        // content: process.env.SYSTEM_PROMPT || DEFAULT_SYSTEM_PROMPT,
+        content: instructions,
       },
     ];
     conversations.set(conversationId, conversationHistory);
