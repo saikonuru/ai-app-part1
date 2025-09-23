@@ -1,6 +1,6 @@
 import type {Request, Response} from 'express';
 import {LLMError} from '../llm-error';
-import {chatSchema} from '../repository/chat.schema';
+import {chatSchema} from '../repositories/chat.schema';
 import {chatService} from '../services/chat.service';
 export const chatController = {
   async sendMessage(req: Request, res: Response) {

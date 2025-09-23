@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import type {ChatCompletionMessageParam} from 'openai/resources/chat/completions';
 import {LLMError} from '../llm-error';
-import {conversationRepository} from '../repository/conversation.repository';
+import {conversationRepository} from '../repositories/conversation.repository';
 
 type ChatResponse = {
   id: string;
