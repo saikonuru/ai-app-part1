@@ -19,15 +19,12 @@ export const reviewsController = {
 
   async summarizeReviews(req: Request, res: Response) {
     const productId = Number(req.params.id);
-    const conversationId = String(
-      req.query.conversationId || req.body.conversationId
-    );
+    // const conversationId = String(
+    //   req.query.conversationId || req.body.conversationId
+    // );
+    const conversationId = '';
     if (isNaN(productId)) {
       return res.status(400).json({error: 'Invalid product Id'});
-    }
-
-    if (!conversationId) {
-      return res.status(400).json({error: 'Invalid conversationId'});
     }
 
     try {

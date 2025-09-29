@@ -12,7 +12,7 @@ type ChatOptions = {
   prompt: string;
   temperature?: number;
   maxTokens?: number;
-  conversationId: string;
+  conversationId?: string;
 };
 
 export type ChatResponse = {
@@ -28,16 +28,19 @@ export const llmClient = {
     maxTokens = 300,
     conversationId,
   }: ChatOptions): Promise<ChatResponse> {
-    // Add user message to the conversation
-    conversationRepository.addMessageToConversation(conversationId, {
-      role: 'user',
-      content: prompt,
-    });
+    let messages;
+    if (conversationId) {
+      conversationRepository.addMessageToConversation(conversationId, {
+        role: 'user',
+        content: prompt,
+      });
+      messages = conversationRepository.getConversationHistory(conversationId);
+    } else {
+      messages = [{role: 'user' as const, content: prompt}];
+    }
 
     try {
       console.log('Calling LLM');
-      const messages =
-        conversationRepository.getConversationHistory(conversationId);
       const response = await client.chat.completions.create({
         model,
         messages,
@@ -48,16 +51,22 @@ export const llmClient = {
         throw new LLMError('No response from LLM', 502, 'no_llm_response');
       }
       const response_text = response.choices[0].message.content;
-      conversationRepository.addMessageToConversation(conversationId, {
-        role: 'assistant',
-        content: response_text,
-      });
+      if (conversationId) {
+        conversationRepository.addMessageToConversation(conversationId, {
+          role: 'assistant',
+          content: response_text,
+        });
+      }
       return {
         id: response.id,
         message: response_text,
       };
     } catch (error) {
-      conversationRepository.removeLastMessageFromConversation(conversationId);
+      if (conversationId) {
+        conversationRepository.removeLastMessageFromConversation(
+          conversationId
+        );
+      }
 
       // Wrap the specific LLM error in a generic LLMError
       if (error instanceof OpenAI.APIError) {
