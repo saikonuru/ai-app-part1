@@ -35,6 +35,7 @@ export const llmClient = {
     });
 
     try {
+      console.log('Calling LLM');
       const messages =
         conversationRepository.getConversationHistory(conversationId);
       const response = await client.chat.completions.create({
