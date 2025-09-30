@@ -22,8 +22,8 @@ export const reviewService = {
       return {id: 'no-template', message: 'No template found for review summary.'};
     }
     const prompt = template.replace('{{reviews}}', joinedReviews);
-
-    return await llmClient.generateText({
+    // console.log(prompt);
+    const response = await llmClient.generateText({
       // model: process.env.LLM_MODEL,
       prompt,
       temperature: 0.2,
@@ -31,5 +31,8 @@ export const reviewService = {
       conversationId,
       conversationType: ConversationType.Review,
     });
+
+    await reviewRepository.storeReviewsSummary(productId, response.message);
+    return response;
   },
 };
