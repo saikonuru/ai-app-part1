@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import {LLMError} from '../llm-error';
-import {conversationRepository} from '../repositories/conversation.repository';
+import {conversationRepository, type ConversationType} from '../repositories/conversation.repository';
 
 const client = new OpenAI({
   baseURL: process.env.LLM_BASE_URL || 'http://localhost:11434/v1',
@@ -13,6 +13,7 @@ type ChatOptions = {
   temperature?: number;
   maxTokens?: number;
   conversationId?: string;
+  conversationType: ConversationType;
 };
 
 export type ChatResponse = {
@@ -27,14 +28,15 @@ export const llmClient = {
     temperature = 0.2,
     maxTokens = 300,
     conversationId,
+    conversationType,
   }: ChatOptions): Promise<ChatResponse> {
     let messages;
     if (conversationId) {
-      conversationRepository.addMessageToConversation(conversationId, {
+      conversationRepository.addMessageToConversation(conversationId, conversationType, {
         role: 'user',
         content: prompt,
       });
-      messages = conversationRepository.getConversationHistory(conversationId);
+      messages = conversationRepository.getConversationHistory(conversationId, conversationType);
     } else {
       messages = [{role: 'user' as const, content: prompt}];
     }
@@ -52,7 +54,7 @@ export const llmClient = {
       }
       const response_text = response.choices[0].message.content;
       if (conversationId) {
-        conversationRepository.addMessageToConversation(conversationId, {
+        conversationRepository.addMessageToConversation(conversationId, conversationType, {
           role: 'assistant',
           content: response_text,
         });
@@ -63,9 +65,7 @@ export const llmClient = {
       };
     } catch (error) {
       if (conversationId) {
-        conversationRepository.removeLastMessageFromConversation(
-          conversationId
-        );
+        conversationRepository.removeLastMessageFromConversation(conversationId, conversationType);
       }
 
       // Wrap the specific LLM error in a generic LLMError

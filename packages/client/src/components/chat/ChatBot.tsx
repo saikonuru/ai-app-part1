@@ -49,9 +49,7 @@ const ChatBot = () => {
   return (
     <div className="flex flex-col h-full">
       <div className="flex flex-col flex-1 gap-3 mb-10 overflow-auto">
-        <h4 className="px-3 py-1 rounded-xl bg-green-600 text-white">
-          Welcome to Smart GTP!
-        </h4>
+        <h4 className="px-3 py-1 rounded-xl bg-green-600 text-white">Welcome to Smart GTP!</h4>
 
         <ChatMessages messages={messages} />
         {isBotTyping && <TypingIndicator />}

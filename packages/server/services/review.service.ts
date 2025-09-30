@@ -1,5 +1,7 @@
 import {type Review} from '../generated/prisma';
 import {llmClient, type ChatResponse} from '../llm/llmClient';
+// import template from '../prompts/summary.txt';
+import {conversationRepository, ConversationType} from '../repositories/conversation.repository';
 import {reviewRepository} from '../repositories/review.repository';
 
 export const reviewService = {
@@ -7,23 +9,19 @@ export const reviewService = {
     return reviewRepository.getReviews(productId, limit);
   },
 
-  async summarizeReviews(
-    productId: number,
-    conversationId: string
-  ): Promise<ChatResponse> {
+  async summarizeReviews(productId: number, conversationId: string): Promise<ChatResponse> {
     const reviews = await reviewService.getReviews(productId, 20);
     const joinedReviews = reviews.map(r => r.content).join('\n\n');
-    const prompt = `
-  Summarize the following customer reviews into a short paragraph
-  highlighting key themes, both positive and negative
-  do not ask any followup questions:
-  ${joinedReviews}
-
-`;
 
     if (joinedReviews.length <= 0) {
       return {id: 'no-reviews', message: 'No reviews found.'};
     }
+
+    const template = conversationRepository.getInstructions(ConversationType.Review);
+    if (!template) {
+      return {id: 'no-template', message: 'No template found for review summary.'};
+    }
+    const prompt = template.replace('{{reviews}}', joinedReviews);
 
     return await llmClient.generateText({
       // model: process.env.LLM_MODEL,
@@ -31,6 +29,7 @@ export const reviewService = {
       temperature: 0.2,
       maxTokens: 500,
       conversationId,
+      conversationType: ConversationType.Review,
     });
   },
 };

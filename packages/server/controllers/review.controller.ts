@@ -28,10 +28,7 @@ export const reviewsController = {
     }
 
     try {
-      const summary = await reviewService.summarizeReviews(
-        productId,
-        conversationId
-      );
+      const summary = await reviewService.summarizeReviews(productId, conversationId);
       return res.json({summary});
     } catch (error) {
       res.status(500).json({error: 'Failed to summarize reviews'});

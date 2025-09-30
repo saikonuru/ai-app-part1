@@ -30,8 +30,7 @@ export const chatController = {
       }
       // Fallback for any other unexpected errors
       return res.status(500).json({
-        message:
-          'An unexpected error occurred while communicating with the assistant.',
+        message: 'An unexpected error occurred while communicating with the assistant.',
       });
     }
   },

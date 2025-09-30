@@ -6,7 +6,8 @@
   "scripts": {
     "start": "bun run index.ts",
     "dev": "bun --watch run index.ts",
-    "debug": "bun --inspect run index.ts"
+    "debug": "bun --inspect run index.ts",
+    "build": "bun build index.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
