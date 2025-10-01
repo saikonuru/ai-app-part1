@@ -12,14 +12,14 @@ export const reviewService = {
   async summarizeReviews(productId: number, conversationId: string): Promise<ChatResponse> {
     const existingSummary = await reviewRepository.getReviewSummary(productId);
     if (existingSummary && existingSummary.expiresAt > new Date()) {
-      return {id: 'existing-summary', message: existingSummary.content};
+      return {id: 'cached-summary', message: existingSummary.content};
     }
 
     const reviews = await this.getReviews(productId, 20);
     const joinedReviews = reviews.map(r => r.content).join('\n\n');
 
     if (joinedReviews.length <= 0) {
-      return {id: 'no-reviews', message: 'No reviews found.'};
+      return {id: 'no-reviews', message: 'There are no reviews to summarize'};
     }
 
     const template = conversationRepository.getInstructions(ConversationType.Review);

@@ -1,4 +1,5 @@
 import type {Request, Response} from 'express';
+import {productRepository} from '../repositories/productRepository';
 import {reviewService} from '../services/review.service';
 
 export const reviewsController = {
@@ -28,6 +29,11 @@ export const reviewsController = {
     }
 
     try {
+      const product = await productRepository.getProduct(productId);
+      if (!product) {
+        res.status(400).json({error: 'Invalid product'});
+        return;
+      }
       const summary = await reviewService.summarizeReviews(productId, conversationId);
       return res.json({summary});
     } catch (error) {
