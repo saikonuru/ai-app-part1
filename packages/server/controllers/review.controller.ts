@@ -1,5 +1,6 @@
 import type {Request, Response} from 'express';
 import {productRepository} from '../repositories/productRepository';
+import {reviewRepository} from '../repositories/review.repository';
 import {reviewService} from '../services/review.service';
 
 export const reviewsController = {
@@ -11,8 +12,15 @@ export const reviewsController = {
     }
 
     try {
-      const reviews = await reviewService.getReviews(productId);
-      res.json(reviews);
+      const reviews = await reviewRepository.getReviews(productId);
+      let summary = await reviewRepository.getReviewSummary(productId);
+
+      if (!summary) {
+        const conversationId = '';
+        let summary = await reviewService.summarizeReviews(productId, conversationId);
+        res.json({summary, reviews});
+      }
+      res.json({summary, reviews});
     } catch (error) {
       res.status(500).json({error: 'Failed to fetch reviews'});
     }

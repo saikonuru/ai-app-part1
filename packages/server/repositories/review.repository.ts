@@ -13,10 +13,14 @@ export const reviewRepository = {
     });
   },
 
-  getReviewSummary(productId: number, limit?: number): Promise<Summary | null> {
-    return prisma.summary.findUnique({
-      where: {productId},
+  async getReviewSummary(productId: number): Promise<Summary | null> {
+    const summary = await prisma.summary.findFirst({
+      where: {
+        AND: [{productId}, {expiresAt: {gt: new Date()}}],
+      },
     });
+
+    return summary ? summary : null;
   },
   storeReviewsSummary(productId: number, summary: string) {
     const now = new Date();
