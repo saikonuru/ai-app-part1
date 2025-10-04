@@ -39,7 +39,7 @@ export const reviewsController = {
     try {
       const product = await productRepository.getProduct(productId);
       if (!product) {
-        res.status(400).json({error: 'Invalid product'});
+        res.status(400).json({error: 'Product does note exists'});
         return;
       }
       const summary = await reviewService.summarizeReviews(productId, conversationId);
