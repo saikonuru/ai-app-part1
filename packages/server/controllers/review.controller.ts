@@ -4,7 +4,7 @@ import {reviewRepository} from '../repositories/review.repository';
 import {reviewService} from '../services/review.service';
 
 export const reviewsController = {
-  async getReviewers(req: Request, res: Response) {
+  async getReviews(req: Request, res: Response) {
     const productId = Number(req.params.id);
 
     if (isNaN(productId)) {
