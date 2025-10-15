@@ -1,83 +1,94 @@
-import axios from 'axios';
-import {useCallback, useEffect, useState} from 'react';
-import Skeleton from 'react-loading-skeleton';
+import {useMutation, useQuery} from '@tanstack/react-query';
+import {HiSparkles} from 'react-icons/hi2';
 import 'react-loading-skeleton/dist/skeleton.css';
+import {Button} from '../ui/button';
+import ReviewSkeleton from './ReviewSkeleton';
 import StarRating from './StarRating';
+import {reviewsApi, type GetReviewsResponse, type SummarizeResponse} from './reviewsApi';
 
 type Props = {
   productId: number;
 };
 
-type Review = {
-  id: number;
-  author: string;
-  content: string;
-  rating: number;
-  createdAt: number;
-};
-
-type GetReviewsResponse = {
-  summary: {id: string; message: string} | null;
-  reviews: Review[];
-};
-
 const ReviewList = ({productId}: Props) => {
-  const [reviewData, setReviewData] = useState<GetReviewsResponse>();
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+  const {
+    data: reviewData,
+    isLoading,
+    error,
+  } = useQuery<GetReviewsResponse>({
+    queryKey: ['reviews', productId],
+    queryFn: () => reviewsApi.fetchReviews(productId),
+  });
+  // const [summarizeError, setSummarizeError] = useState('');
 
-  const fetchReviews = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const {data} = await axios.get<GetReviewsResponse>(`/api/products/${productId}/reviews`);
-      setReviewData(data);
-    } catch (error) {
-      console.error('Failed to fetch reviews:', error);
-      setError('Could not fetch the reviews, Try again!');
-      // Optionally, set an error state here to show an error message
-    } finally {
-      setIsLoading(false);
-    }
-  }, [productId]);
-
-  useEffect(() => {
-    fetchReviews();
-  }, [fetchReviews]);
+  const summaryMutation = useMutation<SummarizeResponse>({
+    mutationFn: () => reviewsApi.summarizeReviews(productId),
+    // onSuccess: () => {
+    //   queryClient.invalidateQueries({queryKey: ['reviews', productId]});
+    // },
+    // onError: () => {
+    //   setSummarizeError('An error occurred while summarizing reviews, please try again!');
+    // },
+  });
 
   if (isLoading) {
     return (
       <div className="flex flex-col gap-5 text-left">
         {[1, 2, 3].map(id => (
-          <div key={id}>
-            <Skeleton width={150} />
-            <Skeleton width={100} />
-            <Skeleton count={2} />
-          </div>
+          <ReviewSkeleton key={id} />
         ))}
       </div>
     );
   }
 
   if (error) {
-    return <p className="text-red-500">{error} </p>;
+    return <p className="text-red-500"> Could not fetch reviews try again! </p>;
   }
 
   if (!reviewData || reviewData.reviews.length === 0) {
     return <div>No reviews found for this product.</div>;
   }
 
+  const currentSummary = reviewData?.summary?.message || summaryMutation?.data?.summary.message;
+
   return (
-    <div className="flex flex-col gap-5 items-start text-left">
-      {reviewData.reviews.map(review => (
-        <div key={review.id}>
-          <div className="font-semibold">Author: {review.author}</div>
-          {/* <div>Rating: {review.rating}/5</div> */}
+    <div className="text-left">
+      <div className="mb-5">
+        {currentSummary ? (
+          <>
+            <b className="text-lg font-semibold">Summary:</b>
+            <p>{currentSummary} </p>
+          </>
+        ) : (
           <div>
-            Rating: <StarRating value={review.rating} />{' '}
+            <Button
+              onClick={() => summaryMutation.mutate()}
+              className="cursor-pointer"
+              disabled={summaryMutation.isPending}
+            >
+              <HiSparkles />
+              Summarize
+            </Button>
+            {summaryMutation.isPending && (
+              <div className="py-3">
+                <ReviewSkeleton />
+              </div>
+            )}
+            {summaryMutation.isError && <p className="text-red-500 py-2">Could't summarize reviews, Try again!</p>}
           </div>
-          <p className="py-2">Review: {review.content}</p>
-        </div>
-      ))}
+        )}
+      </div>
+      <div className="flex flex-col gap-5 items-start text-left">
+        {reviewData.reviews.map(review => (
+          <div key={`${review.author}-${review.createdAt}`}>
+            <div className="font-semibold">Author: {review.author}</div>
+            <div>
+              Rating: <StarRating value={review.rating} />{' '}
+            </div>
+            <p className="py-2">Review: {review.content}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

@@ -15,13 +15,10 @@ export const reviewsController = {
       const reviews = await reviewRepository.getReviews(productId);
       let summary = await reviewRepository.getReviewSummary(productId);
 
-      if (!summary) {
-        const conversationId = '';
-        let summary = await reviewService.summarizeReviews(productId, conversationId);
-        res.json({summary, reviews});
-      }
-      res.json({summary, reviews});
+      // Format the existing summary to match the client's expected structure
+      return res.json({summary: summary ? {message: summary.content} : null, reviews});
     } catch (error) {
+      console.error('Failed to fetch reviews:', error);
       res.status(500).json({error: 'Failed to fetch reviews'});
     }
   },
@@ -45,6 +42,7 @@ export const reviewsController = {
       const summary = await reviewService.summarizeReviews(productId, conversationId);
       return res.json({summary});
     } catch (error) {
+      console.error('Failed to summarize reviews:', error);
       res.status(500).json({error: 'Failed to summarize reviews'});
     }
   },
