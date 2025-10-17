@@ -1,11 +1,14 @@
+import {InferenceClient} from '@huggingface/inference';
 import OpenAI from 'openai';
 import {LLMError} from '../llm-error';
 import {conversationRepository, type ConversationType} from '../repositories/conversation.repository';
 
-const client = new OpenAI({
+const openAIclient = new OpenAI({
   baseURL: process.env.LLM_BASE_URL || 'http://localhost:11434/v1',
   apiKey: 'ollama', // required but not used
 });
+
+const inferenceClient = new InferenceClient(process.env.HF_TOKEN);
 
 type ChatOptions = {
   model?: string;
@@ -43,7 +46,7 @@ export const llmClient = {
 
     try {
       console.log('Calling LLM');
-      const response = await client.chat.completions.create({
+      const response = await openAIclient.chat.completions.create({
         model,
         messages,
         temperature,
@@ -81,5 +84,23 @@ export const llmClient = {
         error
       );
     }
+  },
+  async summarizeReviews(prompt: string, reviews: string) {
+    const chatCompletion = await inferenceClient.chatCompletion({
+      provider: 'novita',
+      model: 'meta-llama/Llama-3.1-8B-Instruct',
+      messages: [
+        {
+          role: 'system',
+          content: prompt,
+        },
+        {
+          role: 'user',
+          content: reviews,
+        },
+      ],
+    });
+
+    return chatCompletion.choices[0]?.message?.content || '';
   },
 };

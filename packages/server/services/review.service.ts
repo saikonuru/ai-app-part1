@@ -21,21 +21,14 @@ export const reviewService = {
       return {id: 'no-reviews', message: 'There are no reviews to summarize'};
     }
 
-    const template = conversationRepository.getInstructions(ConversationType.Review);
-    if (!template) {
+    const system_prompt = conversationRepository.getInstructions(ConversationType.Review);
+    if (!system_prompt) {
       return {id: 'no-template', message: 'No template found for review summary.'};
     }
-    const prompt = template.replace('{{reviews}}', joinedReviews);
-    const response = await llmClient.generateText({
-      // model: process.env.LLM_MODEL,
-      prompt,
-      temperature: 0.2,
-      maxTokens: 500,
-      conversationId,
-      conversationType: ConversationType.Review,
-    });
+    //const prompt = template.replace('{{reviews}}', joinedReviews);
+    const response = await llmClient.summarizeReviews(system_prompt, joinedReviews);
 
-    await reviewRepository.storeReviewsSummary(productId, response.message);
-    return response;
+    await reviewRepository.storeReviewsSummary(productId, response);
+    return {id: 'summary-id', message: response};
   },
 };
