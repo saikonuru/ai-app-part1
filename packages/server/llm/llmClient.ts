@@ -1,4 +1,5 @@
 import {InferenceClient} from '@huggingface/inference';
+import {Ollama} from 'ollama';
 import OpenAI from 'openai';
 import {LLMError} from '../llm-error';
 import {conversationRepository, type ConversationType} from '../repositories/conversation.repository';
@@ -9,6 +10,8 @@ const openAIclient = new OpenAI({
 });
 
 const inferenceClient = new InferenceClient(process.env.HF_TOKEN);
+
+const ollamaClient = new Ollama();
 
 type ChatOptions = {
   model?: string;
@@ -85,10 +88,28 @@ export const llmClient = {
       );
     }
   },
+  // async summarizeReviews(prompt: string, reviews: string) {
+  //   const chatCompletion = await inferenceClient.chatCompletion({
+  //     provider: 'novita',
+  //     model: 'meta-llama/Llama-3.1-8B-Instruct',
+  //     messages: [
+  //       {
+  //         role: 'system',
+  //         content: prompt,
+  //       },
+  //       {
+  //         role: 'user',
+  //         content: reviews,
+  //       },
+  //     ],
+  //   });
+
+  //   return chatCompletion.choices[0]?.message?.content || '';
+  // },
+
   async summarizeReviews(prompt: string, reviews: string) {
-    const chatCompletion = await inferenceClient.chatCompletion({
-      provider: 'novita',
-      model: 'meta-llama/Llama-3.1-8B-Instruct',
+    const response = await ollamaClient.chat({
+      model: 'tinyllama',
       messages: [
         {
           role: 'system',
@@ -101,6 +122,6 @@ export const llmClient = {
       ],
     });
 
-    return chatCompletion.choices[0]?.message?.content || '';
+    return response.message?.content || '';
   },
 };
