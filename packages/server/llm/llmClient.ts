@@ -6,7 +6,7 @@ import {conversationRepository, type ConversationType} from '../repositories/con
 
 const openAIclient = new OpenAI({
   baseURL: process.env.LLM_BASE_URL || 'http://localhost:11434/v1',
-  apiKey: 'ollama', // required but not used
+  apiKey: process.env.HF_TOKEN, // Optional for local LLM like Ollama
 });
 
 const inferenceClient = new InferenceClient(process.env.HF_TOKEN);
