@@ -84,7 +84,7 @@ export const llmClient = {
         'An unexpected error occurred while communicating with the assistant.',
         500,
         'internal_server_error',
-        error
+        error instanceof Error ? error : undefined
       );
     }
   },
