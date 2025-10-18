@@ -1,4 +1,4 @@
-import {InferenceClient} from '@huggingface/inference';
+import {HfInference} from '@huggingface/inference';
 import {Ollama} from 'ollama';
 import OpenAI from 'openai';
 import {LLMError} from '../llm-error';
@@ -9,7 +9,7 @@ const openAIclient = new OpenAI({
   apiKey: process.env.HF_TOKEN, // Optional for local LLM like Ollama
 });
 
-const inferenceClient = new InferenceClient(process.env.HF_TOKEN);
+const inferenceClient = new HfInference(process.env.HF_TOKEN);
 
 const ollamaClient = new Ollama();
 
