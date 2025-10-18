@@ -1,33 +1,5 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "packages/client/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    },
-    {
-      "src": "packages/server/package.json",
-      "use": "@vercel/bun",
-      "config": {
-        "outputDirectory": false
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "packages/server/index.ts"
-    },
-    {
-      "src": "/assets/(.*)",
-      "dest": "/packages/client/dist/assets/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/packages/client/dist/index.html"
-    }
-  ]
+  "builds": [{"src": "packages/server/index.ts", "use": "@vercel/node"}],
+  "routes": [{"src": "/api/(.*)", "dest": "packages/server/index.ts"}]
 }
