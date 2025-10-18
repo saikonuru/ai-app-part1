@@ -4,7 +4,6 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "echo 'Root build script'",
     "dev": "bun run index.ts",
     "debug": "bun --inspect run index.ts",
     "format": "prettier --write .",

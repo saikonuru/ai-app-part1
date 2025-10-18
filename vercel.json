@@ -1,8 +1,5 @@
 {
   "version": 2,
-  "builds": [
-    {"src": "package.json", "use": "@vercel/static-build", "config": {"outputDirectory": "dist"}},
-    {"src": "packages/server/index.ts", "use": "@vercel/node"}
-  ],
+  "builds": [{"src": "packages/server/index.ts", "use": "@vercel/node"}],
   "routes": [{"src": "/api/(.*)", "dest": "packages/server/index.ts"}]
 }
