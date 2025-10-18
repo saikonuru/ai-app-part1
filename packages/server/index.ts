@@ -7,7 +7,10 @@ const app = express();
 app.use(express.json());
 app.use(router);
 const port = process.env.PORT || 3000;
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+  });
+}
 
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
+export default app;
