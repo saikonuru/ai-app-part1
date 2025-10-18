@@ -10,7 +10,10 @@
     },
     {
       "src": "packages/server/package.json",
-      "use": "@vercel/bun"
+      "use": "@vercel/bun",
+      "config": {
+        "outputDirectory": false
+      }
     }
   ],
   "routes": [
